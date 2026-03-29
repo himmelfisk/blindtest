@@ -30,6 +30,8 @@ export default function CreateOrganizationScreen() {
 
   return (
     <div className="page">
+      <button className="back-btn" onClick={() => navigate('/organizations')}>← Back</button>
+
       <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>Create a New Group</h1>
       <p style={{ color: 'var(--color-text-secondary)', marginBottom: 24, fontSize: '0.875rem' }}>
         Groups let you organize people and run blind testing events together.

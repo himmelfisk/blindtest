@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
+import { getCategoryEmoji } from '../utils/categoryEmoji';
 
 export default function FormDetailsScreen() {
   const { id } = useParams<{ id: string }>();
@@ -24,8 +25,10 @@ export default function FormDetailsScreen() {
 
   return (
     <div className="page">
+      <button className="back-btn" onClick={() => navigate('/forms')}>← Forms</button>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ fontSize: '1.5rem', flex: 1 }}>{form.name}</h1>
+        <h1 style={{ fontSize: '1.5rem', flex: 1 }}>{getCategoryEmoji(form.category)} {form.name}</h1>
         <span className="badge badge-category">{form.category}</span>
       </div>
 

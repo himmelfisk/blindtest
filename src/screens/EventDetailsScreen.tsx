@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
+import { getCategoryEmoji } from '../utils/categoryEmoji';
 
 export default function EventDetailsScreen() {
   const { id } = useParams<{ id: string }>();
   const { state, dispatch } = useAppContext();
   const navigate = useNavigate();
   const [inviteEmail, setInviteEmail] = useState('');
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const event = state.events.find((e) => e.id === id);
   if (!event) {
@@ -16,6 +18,7 @@ export default function EventDetailsScreen() {
   const org = state.organizations.find((o) => o.id === event.organizationId);
   const form = state.forms.find((f) => f.id === event.formId);
   const submissions = state.submissions.filter((s) => s.eventId === id);
+  const emoji = form ? getCategoryEmoji(form.category) : '🧪';
 
   const handleStatusChange = (status: 'upcoming' | 'active' | 'completed') => {
     dispatch({ type: 'UPDATE_EVENT', payload: { ...event, status } });
@@ -29,6 +32,18 @@ export default function EventDetailsScreen() {
     setInviteEmail('');
   };
 
+  const handleCopyLink = async () => {
+    const url = `${window.location.origin}/events/${id}/test`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      // Fallback: show the link in a prompt
+      prompt('Copy this link and share it with your friends:', url);
+    }
+  };
+
   const handleDelete = () => {
     if (confirm('Are you sure you want to delete this event?')) {
       dispatch({ type: 'DELETE_EVENT', payload: id! });
@@ -38,8 +53,10 @@ export default function EventDetailsScreen() {
 
   return (
     <div className="page">
+      <button className="back-btn" onClick={() => navigate('/events')}>← Events</button>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ fontSize: '1.5rem', flex: 1 }}>{event.name}</h1>
+        <h1 style={{ fontSize: '1.5rem', flex: 1 }}>{emoji} {event.name}</h1>
         <span className={`badge badge-${event.status}`}>{event.status}</span>
       </div>
 
@@ -68,6 +85,38 @@ export default function EventDetailsScreen() {
         </div>
       </div>
 
+      {/* Quick actions for active event */}
+      {event.status === 'active' && (
+        <div className="actions-row" style={{ marginBottom: 16 }}>
+          <button className="action-card" onClick={() => navigate(`/events/${id}/test`)}>
+            <div className="icon">🧪</div>
+            <div className="label">Start Tasting</div>
+          </button>
+          <button className="action-card" onClick={handleCopyLink}>
+            <div className="icon">{linkCopied ? '✅' : '🔗'}</div>
+            <div className="label">{linkCopied ? 'Copied!' : 'Copy Link'}</div>
+          </button>
+          <button
+            className="action-card"
+            onClick={() => navigate(`/events/${id}/results`)}
+          >
+            <div className="icon">📊</div>
+            <div className="label">Results</div>
+          </button>
+        </div>
+      )}
+
+      {/* Results button for completed events */}
+      {event.status === 'completed' && submissions.length > 0 && (
+        <button
+          className="btn btn-secondary btn-block"
+          style={{ marginBottom: 16 }}
+          onClick={() => navigate(`/events/${id}/results`)}
+        >
+          🏆 View Results ({submissions.length} response{submissions.length !== 1 ? 's' : ''})
+        </button>
+      )}
+
       {/* Status controls */}
       <div className="section-header" style={{ marginTop: 8 }}>
         <h2 className="section-title">Status</h2>
@@ -79,6 +128,7 @@ export default function EventDetailsScreen() {
             className={`picker-option${event.status === s ? ' selected' : ''}`}
             onClick={() => handleStatusChange(s)}
           >
+            {s === 'upcoming' ? '📅 ' : s === 'active' ? '🟢 ' : '✅ '}
             {s.charAt(0).toUpperCase() + s.slice(1)}
           </button>
         ))}
@@ -139,18 +189,29 @@ export default function EventDetailsScreen() {
         ))
       )}
 
-      {/* Start Testing button */}
-      {event.status === 'active' && (
+      {/* Share link (non-active events too) */}
+      {event.status !== 'active' && (
         <button
-          className="btn btn-secondary btn-block"
-          style={{ marginTop: 24 }}
-          onClick={() => navigate(`/events/${id}/test`)}
+          className="btn btn-outline btn-block"
+          style={{ marginTop: 16 }}
+          onClick={handleCopyLink}
         >
-          Start Blind Testing
+          {linkCopied ? '✅ Link Copied!' : '🔗 Copy Tasting Link'}
         </button>
       )}
 
-      <button className="btn btn-danger btn-block" style={{ marginTop: 12 }} onClick={handleDelete}>
+      {/* View results anytime there are submissions */}
+      {event.status !== 'completed' && submissions.length > 0 && (
+        <button
+          className="btn btn-outline btn-block"
+          style={{ marginTop: 12 }}
+          onClick={() => navigate(`/events/${id}/results`)}
+        >
+          📊 View Results ({submissions.length})
+        </button>
+      )}
+
+      <button className="btn btn-danger btn-block" style={{ marginTop: 24 }} onClick={handleDelete}>
         Delete Event
       </button>
     </div>

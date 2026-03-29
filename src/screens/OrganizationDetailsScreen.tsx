@@ -45,6 +45,8 @@ export default function OrganizationDetailsScreen() {
 
   return (
     <div className="page">
+      <button className="back-btn" onClick={() => navigate('/organizations')}>← Back</button>
+
       <h1 style={{ fontSize: '1.5rem' }}>{org.name}</h1>
       {org.description && (
         <p style={{ color: 'var(--color-text-secondary)', marginTop: 8, fontSize: '0.875rem' }}>

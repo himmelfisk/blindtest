@@ -81,6 +81,8 @@ export default function CreateEventScreen() {
 
   return (
     <div className="page">
+      <button type="button" className="back-btn" onClick={() => navigate('/events')}>← Back</button>
+
       <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>Create Testing Event</h1>
       <p style={{ color: 'var(--color-text-secondary)', marginBottom: 24, fontSize: '0.875rem' }}>
         Set up a blind testing event and invite participants.

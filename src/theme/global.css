@@ -480,3 +480,35 @@ textarea.form-input {
   font-size: 0.75rem;
   font-weight: 600;
 }
+
+/* Back button */
+.back-btn {
+  display: inline-block;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-bottom: 12px;
+}
+
+.back-btn:active {
+  opacity: 0.7;
+}
+
+/* Step numbers (onboarding) */
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
