@@ -186,8 +186,8 @@ export default function BlindTestScreen() {
               <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Criteria</div>
             </div>
             <div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>1–{form.criteria[0]?.maxValue ?? 10}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Scale</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>{maxScore}</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Max Score</div>
             </div>
           </div>
         </div>

@@ -8,6 +8,12 @@ interface SampleDraft {
   revealName: string;
 }
 
+const DEFAULT_SAMPLES: SampleDraft[] = [
+  { code: 'A', revealName: '' },
+  { code: 'B', revealName: '' },
+  { code: 'C', revealName: '' },
+];
+
 export default function CreateEventScreen() {
   const { state, dispatch } = useAppContext();
   const navigate = useNavigate();
@@ -23,11 +29,9 @@ export default function CreateEventScreen() {
       ? state.forms.find((f) => f.id === preselectedFormId)?.organizationId ?? (state.organizations[0]?.id ?? '')
       : state.organizations[0]?.id ?? ''
   );
-  const [samples, setSamples] = useState<SampleDraft[]>([
-    { code: 'A', revealName: '' },
-    { code: 'B', revealName: '' },
-    { code: 'C', revealName: '' },
-  ]);
+  const [samples, setSamples] = useState<SampleDraft[]>(
+    DEFAULT_SAMPLES.map((s) => ({ ...s }))
+  );
   const [newSampleCode, setNewSampleCode] = useState('');
   const [newSampleReveal, setNewSampleReveal] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
