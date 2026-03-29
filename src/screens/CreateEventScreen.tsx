@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 import { useAppContext } from '../context/useAppContext';
 
 export default function CreateEventScreen() {
@@ -71,7 +72,7 @@ export default function CreateEventScreen() {
         formId,
         organizationId,
         status: 'upcoming',
-        samples: sampleCodes.map((code) => ({ id: '', code })),
+        samples: sampleCodes.map((code) => ({ id: uuidv4(), code })),
         invitedEmails,
       },
     });
