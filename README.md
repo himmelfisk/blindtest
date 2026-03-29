@@ -39,8 +39,71 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ```bash
 npm run build
+```
+
+This compiles TypeScript and bundles the app into the `dist/` directory.
+
+To preview the production build locally:
+
+```bash
 npm run preview
 ```
+
+### Deploy
+
+The production build (`dist/`) is a static site that can be served by any static hosting provider.
+
+#### GitHub Pages
+
+1. Install the `gh-pages` package:
+
+   ```bash
+   npm install --save-dev gh-pages
+   ```
+
+2. Add a `deploy` script to `package.json`:
+
+   ```json
+   "scripts": {
+     "deploy": "gh-pages -d dist"
+   }
+   ```
+
+3. Set the `base` option in `vite.config.ts` to your repository name (e.g. `/blindtest/`):
+
+   ```ts
+   export default defineConfig({
+     base: '/blindtest/',
+     plugins: [react()],
+   })
+   ```
+
+4. Build and deploy:
+
+   ```bash
+   npm run build
+   npm run deploy
+   ```
+
+The site will be available at `https://<username>.github.io/blindtest/`.
+
+#### Netlify / Vercel
+
+1. Connect the repository to [Netlify](https://www.netlify.com/) or [Vercel](https://vercel.com/).
+2. Set the build command to `npm run build` and the publish directory to `dist`.
+3. Deploy — the platform will provide a URL to access the app.
+
+#### Manual / Self-Hosted
+
+Copy the contents of `dist/` to any web server or CDN that can serve static files (e.g. Nginx, Apache, S3 + CloudFront).
+
+### Accessing the App
+
+| Environment | URL |
+|---|---|
+| Development | [http://localhost:5173](http://localhost:5173) (started with `npm run dev`) |
+| Production preview | [http://localhost:4173](http://localhost:4173) (started with `npm run preview`) |
+| Deployed | The URL provided by your hosting platform |
 
 ### Add Native Platforms (Capacitor)
 
