@@ -1,0 +1,39 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AppProvider } from './context/AppContext';
+import TabBar from './components/TabBar';
+import HomeScreen from './screens/HomeScreen';
+import OrganizationsListScreen from './screens/OrganizationsListScreen';
+import CreateOrganizationScreen from './screens/CreateOrganizationScreen';
+import OrganizationDetailsScreen from './screens/OrganizationDetailsScreen';
+import FormsListScreen from './screens/FormsListScreen';
+import CreateFormScreen from './screens/CreateFormScreen';
+import FormDetailsScreen from './screens/FormDetailsScreen';
+import EventsListScreen from './screens/EventsListScreen';
+import CreateEventScreen from './screens/CreateEventScreen';
+import EventDetailsScreen from './screens/EventDetailsScreen';
+import BlindTestScreen from './screens/BlindTestScreen';
+
+function App() {
+  return (
+    <AppProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomeScreen />} />
+          <Route path="/organizations" element={<OrganizationsListScreen />} />
+          <Route path="/organizations/new" element={<CreateOrganizationScreen />} />
+          <Route path="/organizations/:id" element={<OrganizationDetailsScreen />} />
+          <Route path="/forms" element={<FormsListScreen />} />
+          <Route path="/forms/new" element={<CreateFormScreen />} />
+          <Route path="/forms/:id" element={<FormDetailsScreen />} />
+          <Route path="/events" element={<EventsListScreen />} />
+          <Route path="/events/new" element={<CreateEventScreen />} />
+          <Route path="/events/:id" element={<EventDetailsScreen />} />
+          <Route path="/events/:id/test" element={<BlindTestScreen />} />
+        </Routes>
+        <TabBar />
+      </BrowserRouter>
+    </AppProvider>
+  );
+}
+
+export default App;
