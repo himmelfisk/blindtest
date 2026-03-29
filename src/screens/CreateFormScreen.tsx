@@ -123,7 +123,7 @@ export default function CreateFormScreen() {
 
       <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>Create Testing Form</h1>
       <p style={{ color: 'var(--color-text-secondary)', marginBottom: 24, fontSize: '0.875rem' }}>
-        Define the criteria participants will use to evaluate samples.
+        Define how your friends will rate each sample.
       </p>
 
       <form onSubmit={handleSubmit}>

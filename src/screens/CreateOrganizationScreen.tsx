@@ -34,7 +34,7 @@ export default function CreateOrganizationScreen() {
 
       <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>Create a New Group</h1>
       <p style={{ color: 'var(--color-text-secondary)', marginBottom: 24, fontSize: '0.875rem' }}>
-        Groups let you organize people and run blind testing events together.
+        A group is your tasting crew. Add your friends and start organizing events together!
       </p>
 
       <form onSubmit={handleSubmit}>
