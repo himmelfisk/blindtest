@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { useAppContext } from '../context/useAppContext';
+import { getCategoryEmoji } from '../utils/categoryEmoji';
 import type { CriterionDefinition } from '../models/types';
 
 const PRESET_CATEGORIES = [
@@ -118,9 +119,11 @@ export default function CreateFormScreen() {
 
   return (
     <div className="page">
+      <button type="button" className="back-btn" onClick={() => navigate('/forms')}>← Back</button>
+
       <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>Create Testing Form</h1>
       <p style={{ color: 'var(--color-text-secondary)', marginBottom: 24, fontSize: '0.875rem' }}>
-        Define the criteria participants will use to evaluate samples.
+        Define how your friends will rate each sample.
       </p>
 
       <form onSubmit={handleSubmit}>
@@ -160,7 +163,7 @@ export default function CreateFormScreen() {
                 className={`chip${category === cat ? ' selected' : ''}`}
                 onClick={() => handleCategoryChange(cat)}
               >
-                {cat}
+                {getCategoryEmoji(cat)} {cat}
               </button>
             ))}
           </div>

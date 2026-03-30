@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import TabBar from './components/TabBar';
 import HomeScreen from './screens/HomeScreen';
@@ -12,25 +12,38 @@ import EventsListScreen from './screens/EventsListScreen';
 import CreateEventScreen from './screens/CreateEventScreen';
 import EventDetailsScreen from './screens/EventDetailsScreen';
 import BlindTestScreen from './screens/BlindTestScreen';
+import ResultsScreen from './screens/ResultsScreen';
+
+function AppRoutes() {
+  const location = useLocation();
+  const hideTabBar = location.pathname.endsWith('/test');
+
+  return (
+    <>
+      <Routes>
+        <Route path="/" element={<HomeScreen />} />
+        <Route path="/organizations" element={<OrganizationsListScreen />} />
+        <Route path="/organizations/new" element={<CreateOrganizationScreen />} />
+        <Route path="/organizations/:id" element={<OrganizationDetailsScreen />} />
+        <Route path="/forms" element={<FormsListScreen />} />
+        <Route path="/forms/new" element={<CreateFormScreen />} />
+        <Route path="/forms/:id" element={<FormDetailsScreen />} />
+        <Route path="/events" element={<EventsListScreen />} />
+        <Route path="/events/new" element={<CreateEventScreen />} />
+        <Route path="/events/:id" element={<EventDetailsScreen />} />
+        <Route path="/events/:id/test" element={<BlindTestScreen />} />
+        <Route path="/events/:id/results" element={<ResultsScreen />} />
+      </Routes>
+      {!hideTabBar && <TabBar />}
+    </>
+  );
+}
 
 function App() {
   return (
     <AppProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomeScreen />} />
-          <Route path="/organizations" element={<OrganizationsListScreen />} />
-          <Route path="/organizations/new" element={<CreateOrganizationScreen />} />
-          <Route path="/organizations/:id" element={<OrganizationDetailsScreen />} />
-          <Route path="/forms" element={<FormsListScreen />} />
-          <Route path="/forms/new" element={<CreateFormScreen />} />
-          <Route path="/forms/:id" element={<FormDetailsScreen />} />
-          <Route path="/events" element={<EventsListScreen />} />
-          <Route path="/events/new" element={<CreateEventScreen />} />
-          <Route path="/events/:id" element={<EventDetailsScreen />} />
-          <Route path="/events/:id/test" element={<BlindTestScreen />} />
-        </Routes>
-        <TabBar />
+        <AppRoutes />
       </BrowserRouter>
     </AppProvider>
   );

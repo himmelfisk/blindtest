@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
+import { getCategoryEmoji } from '../utils/categoryEmoji';
 
 export default function FormsListScreen() {
   const { state } = useAppContext();
@@ -17,7 +18,7 @@ export default function FormsListScreen() {
           <div className="empty-state">
             <div className="icon">📋</div>
             <h3>No testing forms yet</h3>
-            <p>Create a customizable form to define criteria for your blind tests</p>
+            <p>Create a form to define how your friends will rate each sample</p>
           </div>
         ) : (
           state.forms.map((form) => {
@@ -30,7 +31,7 @@ export default function FormsListScreen() {
                 onClick={() => navigate(`/forms/${form.id}`)}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <strong>{form.name}</strong>
+                  <strong>{getCategoryEmoji(form.category)} {form.name}</strong>
                   <span className="badge badge-category">{form.category}</span>
                 </div>
                 {form.description && (

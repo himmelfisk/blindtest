@@ -3,6 +3,17 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { useAppContext } from '../context/useAppContext';
 
+interface SampleDraft {
+  code: string;
+  revealName: string;
+}
+
+const DEFAULT_SAMPLES: SampleDraft[] = [
+  { code: 'A', revealName: '' },
+  { code: 'B', revealName: '' },
+  { code: 'C', revealName: '' },
+];
+
 export default function CreateEventScreen() {
   const { state, dispatch } = useAppContext();
   const navigate = useNavigate();
@@ -18,8 +29,11 @@ export default function CreateEventScreen() {
       ? state.forms.find((f) => f.id === preselectedFormId)?.organizationId ?? (state.organizations[0]?.id ?? '')
       : state.organizations[0]?.id ?? ''
   );
-  const [sampleCodes, setSampleCodes] = useState<string[]>(['A', 'B', 'C']);
+  const [samples, setSamples] = useState<SampleDraft[]>(
+    DEFAULT_SAMPLES.map((s) => ({ ...s }))
+  );
   const [newSampleCode, setNewSampleCode] = useState('');
+  const [newSampleReveal, setNewSampleReveal] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitedEmails, setInvitedEmails] = useState<string[]>([]);
 
@@ -43,9 +57,10 @@ export default function CreateEventScreen() {
   const handleAddSample = () => {
     const code = newSampleCode.trim();
     if (!code) { alert('Please enter a sample code.'); return; }
-    if (sampleCodes.includes(code)) { alert('This sample code already exists.'); return; }
-    setSampleCodes([...sampleCodes, code]);
+    if (samples.some((s) => s.code === code)) { alert('This sample code already exists.'); return; }
+    setSamples([...samples, { code, revealName: newSampleReveal.trim() }]);
     setNewSampleCode('');
+    setNewSampleReveal('');
   };
 
   const handleAddInvite = () => {
@@ -61,7 +76,7 @@ export default function CreateEventScreen() {
     if (!name.trim()) { alert('Please enter an event name.'); return; }
     if (!date) { alert('Please select a date.'); return; }
     if (!formId) { alert('Please select a testing form.'); return; }
-    if (sampleCodes.length === 0) { alert('Please add at least one sample.'); return; }
+    if (samples.length === 0) { alert('Please add at least one sample.'); return; }
 
     dispatch({
       type: 'ADD_EVENT',
@@ -72,7 +87,11 @@ export default function CreateEventScreen() {
         formId,
         organizationId,
         status: 'upcoming',
-        samples: sampleCodes.map((code) => ({ id: uuidv4(), code })),
+        samples: samples.map((s) => ({
+          id: uuidv4(),
+          code: s.code,
+          ...(s.revealName ? { revealName: s.revealName } : {}),
+        })),
         invitedEmails,
       },
     });
@@ -81,9 +100,11 @@ export default function CreateEventScreen() {
 
   return (
     <div className="page">
+      <button type="button" className="back-btn" onClick={() => navigate('/events')}>← Back</button>
+
       <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>Create Testing Event</h1>
       <p style={{ color: 'var(--color-text-secondary)', marginBottom: 24, fontSize: '0.875rem' }}>
-        Set up a blind testing event and invite participants.
+        Set up a blind tasting and share it with your friends.
       </p>
 
       <form onSubmit={handleSubmit}>
@@ -94,7 +115,7 @@ export default function CreateEventScreen() {
 
         <div className="form-group">
           <label className="form-label">Description</label>
-          <textarea className="form-input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe the event" />
+          <textarea className="form-input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What are you tasting today?" />
         </div>
 
         <div className="form-group">
@@ -148,34 +169,61 @@ export default function CreateEventScreen() {
         <div className="divider" />
 
         <div className="section-header">
-          <h2 className="section-title">Samples ({sampleCodes.length})</h2>
+          <h2 className="section-title">Samples ({samples.length})</h2>
         </div>
         <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: 12 }}>
-          Add anonymous sample codes. Names can be revealed after testing.
+          Add samples with anonymous codes. The real name is hidden during tasting and revealed in the results!
         </p>
 
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          <input
-            className="form-input"
-            style={{ flex: 1 }}
-            value={newSampleCode}
-            onChange={(e) => setNewSampleCode(e.target.value)}
-            placeholder="Sample code (e.g., D, E)"
-          />
-          <button type="button" className="btn btn-outline" onClick={handleAddSample}>Add</button>
-        </div>
-
-        <div className="chip-row" style={{ marginBottom: 16 }}>
-          {sampleCodes.map((code) => (
-            <div
-              key={code}
-              className="chip selected"
-              style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
-              onClick={() => setSampleCodes(sampleCodes.filter((c) => c !== code))}
-            >
-              {code} ✕
+        {/* Existing samples */}
+        {samples.map((sample) => (
+          <div
+            key={sample.code}
+            className="card"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', marginBottom: 8 }}
+          >
+            <div>
+              <strong>Sample {sample.code}</strong>
+              {sample.revealName && (
+                <span style={{ marginLeft: 8, fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+                  🎭 {sample.revealName}
+                </span>
+              )}
             </div>
-          ))}
+            <button
+              type="button"
+              onClick={() => setSamples(samples.filter((s) => s.code !== sample.code))}
+              style={{
+                width: 24, height: 24, borderRadius: '50%', background: 'var(--color-surface-variant)',
+                border: 'none', fontSize: '0.75rem', color: 'var(--color-text-secondary)', cursor: 'pointer',
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+
+        {/* Add new sample */}
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+            <input
+              className="form-input"
+              style={{ width: 80, flexShrink: 0 }}
+              value={newSampleCode}
+              onChange={(e) => setNewSampleCode(e.target.value)}
+              placeholder="Code"
+            />
+            <input
+              className="form-input"
+              style={{ flex: 1 }}
+              value={newSampleReveal}
+              onChange={(e) => setNewSampleReveal(e.target.value)}
+              placeholder="Real name (optional, for reveal)"
+            />
+          </div>
+          <button type="button" className="btn btn-outline btn-block" onClick={handleAddSample}>
+            + Add Sample
+          </button>
         </div>
 
         <div className="divider" />
@@ -183,6 +231,9 @@ export default function CreateEventScreen() {
         <div className="section-header">
           <h2 className="section-title">Invite Participants ({invitedEmails.length})</h2>
         </div>
+        <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: 12 }}>
+          Optional — you can also share the tasting link directly after creating the event.
+        </p>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
           <input
@@ -213,7 +264,7 @@ export default function CreateEventScreen() {
         ))}
 
         <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: 24 }}>
-          Create Event
+          Create Event 🎉
         </button>
       </form>
     </div>

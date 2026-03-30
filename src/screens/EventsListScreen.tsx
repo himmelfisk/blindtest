@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/useAppContext';
+import { getCategoryEmoji } from '../utils/categoryEmoji';
 
 export default function EventsListScreen() {
   const { state } = useAppContext();
@@ -9,7 +10,7 @@ export default function EventsListScreen() {
     <div>
       <div className="page-header">
         <h1>Events</h1>
-        <p>Manage your blind testing events</p>
+        <p>Your blind tasting events</p>
       </div>
 
       <div className="page">
@@ -17,12 +18,14 @@ export default function EventsListScreen() {
           <div className="empty-state">
             <div className="icon">🎉</div>
             <h3>No events yet</h3>
-            <p>Create a testing form first, then organize a blind testing event</p>
+            <p>Create a testing form first, then organize a blind tasting with friends!</p>
           </div>
         ) : (
           state.events.map((event) => {
             const org = state.organizations.find((o) => o.id === event.organizationId);
             const form = state.forms.find((f) => f.id === event.formId);
+            const emoji = form ? getCategoryEmoji(form.category) : '🧪';
+            const submissions = state.submissions.filter((s) => s.eventId === event.id);
             return (
               <div
                 key={event.id}
@@ -31,7 +34,7 @@ export default function EventsListScreen() {
                 onClick={() => navigate(`/events/${event.id}`)}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <strong>{event.name}</strong>
+                  <strong>{emoji} {event.name}</strong>
                   <span className={`badge badge-${event.status}`}>{event.status}</span>
                 </div>
                 {event.description && (
@@ -44,7 +47,7 @@ export default function EventsListScreen() {
                   <span>{new Date(event.date).toLocaleDateString()}</span>
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--color-text-light)', marginTop: 4 }}>
-                  {event.samples.length} samples • {event.invitedEmails.length} invited
+                  {event.samples.length} samples • {submissions.length} response{submissions.length !== 1 ? 's' : ''}
                 </div>
               </div>
             );

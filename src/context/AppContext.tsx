@@ -1,4 +1,4 @@
-import { useReducer, type ReactNode } from 'react';
+import { useReducer, useEffect, type ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   Organization,
@@ -10,12 +10,17 @@ import type {
 } from '../models/types';
 import { AppContext, type AppState, type AppAction } from './appContextDef';
 
-const initialState: AppState = {
-  organizations: [],
-  forms: [],
-  events: [],
-  submissions: [],
-};
+const STORAGE_KEY = 'blindtest-state';
+
+function loadState(): AppState {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw) as AppState;
+  } catch { /* ignore corrupt storage */ }
+  return { organizations: [], forms: [], events: [], submissions: [] };
+}
+
+const initialState: AppState = loadState();
 
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
@@ -154,6 +159,13 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch { /* storage full or unavailable */ }
+  }, [state]);
+
   return (
     <AppContext.Provider value={{ state, dispatch }}>
       {children}
