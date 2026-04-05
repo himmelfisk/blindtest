@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import { useAppContext } from '../context/useAppContext';
 
@@ -18,6 +19,7 @@ export default function CreateEventScreen() {
   const { state, dispatch } = useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const preselectedFormId = (location.state as { preselectedFormId?: string } | null)?.preselectedFormId;
 
   const [name, setName] = useState('');
@@ -42,10 +44,10 @@ export default function CreateEventScreen() {
       <div className="page">
         <div className="empty-state">
           <div className="icon">📋</div>
-          <h3>Create a testing form first</h3>
-          <p>You need at least one testing form before creating an event.</p>
+          <h3>{t('events.noFormFirst')}</h3>
+          <p>{t('events.noFormFirstHint')}</p>
           <button className="btn btn-primary" style={{ marginTop: 20 }} onClick={() => navigate('/forms/new')}>
-            Create Form
+            {t('forms.createForm')}
           </button>
         </div>
       </div>
@@ -56,8 +58,8 @@ export default function CreateEventScreen() {
 
   const handleAddSample = () => {
     const code = newSampleCode.trim();
-    if (!code) { alert('Please enter a sample code.'); return; }
-    if (samples.some((s) => s.code === code)) { alert('This sample code already exists.'); return; }
+    if (!code) { alert(t('events.alertSampleCode')); return; }
+    if (samples.some((s) => s.code === code)) { alert(t('events.alertSampleExists')); return; }
     setSamples([...samples, { code, revealName: newSampleReveal.trim() }]);
     setNewSampleCode('');
     setNewSampleReveal('');
@@ -65,18 +67,18 @@ export default function CreateEventScreen() {
 
   const handleAddInvite = () => {
     const email = inviteEmail.trim().toLowerCase();
-    if (!email) { alert('Please enter an email.'); return; }
-    if (invitedEmails.includes(email)) { alert('This email has already been invited.'); return; }
+    if (!email) { alert(t('events.alertEmail')); return; }
+    if (invitedEmails.includes(email)) { alert(t('events.alertEmailExists')); return; }
     setInvitedEmails([...invitedEmails, email]);
     setInviteEmail('');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) { alert('Please enter an event name.'); return; }
-    if (!date) { alert('Please select a date.'); return; }
-    if (!formId) { alert('Please select a testing form.'); return; }
-    if (samples.length === 0) { alert('Please add at least one sample.'); return; }
+    if (!name.trim()) { alert(t('events.alertEventName')); return; }
+    if (!date) { alert(t('events.alertDate')); return; }
+    if (!formId) { alert(t('events.alertForm')); return; }
+    if (samples.length === 0) { alert(t('events.alertSample')); return; }
 
     dispatch({
       type: 'ADD_EVENT',
@@ -100,31 +102,31 @@ export default function CreateEventScreen() {
 
   return (
     <div className="page">
-      <button type="button" className="back-btn" onClick={() => navigate('/events')}>← Back</button>
+      <button type="button" className="back-btn" onClick={() => navigate('/events')}>{t('common.back')}</button>
 
-      <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>Create Testing Event</h1>
+      <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>{t('events.createTitle')}</h1>
       <p style={{ color: 'var(--color-text-secondary)', marginBottom: 24, fontSize: '0.875rem' }}>
-        Set up a blind tasting and share it with your friends.
+        {t('events.createDesc')}
       </p>
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label className="form-label">Event Name *</label>
-          <input className="form-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Friday IPA Showdown" />
+          <label className="form-label">{t('events.eventName')}</label>
+          <input className="form-input" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('events.eventNamePlaceholder')} />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Description</label>
-          <textarea className="form-input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What are you tasting today?" />
+          <label className="form-label">{t('common.description')}</label>
+          <textarea className="form-input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t('events.descriptionPlaceholder')} />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Date *</label>
+          <label className="form-label">{t('events.date')}</label>
           <input className="form-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Group *</label>
+          <label className="form-label">{t('forms.group')}</label>
           <div className="picker-row">
             {state.organizations.map((org) => (
               <button
@@ -144,11 +146,11 @@ export default function CreateEventScreen() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Testing Form *</label>
+          <label className="form-label">{t('events.testingForm')}</label>
           {orgForms.length === 0 ? (
             <p style={{ fontSize: '0.875rem', color: 'var(--color-text-light)' }}>
-              No forms for this group.{' '}
-              <button type="button" className="text-link" onClick={() => navigate('/forms/new')}>Create one</button>
+              {t('events.noFormsForGroup')}{' '}
+              <button type="button" className="text-link" onClick={() => navigate('/forms/new')}>{t('events.createOne')}</button>
             </p>
           ) : (
             <div className="picker-row">
@@ -169,10 +171,10 @@ export default function CreateEventScreen() {
         <div className="divider" />
 
         <div className="section-header">
-          <h2 className="section-title">Samples ({samples.length})</h2>
+          <h2 className="section-title">{t('events.samplesSection')} ({samples.length})</h2>
         </div>
         <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: 12 }}>
-          Add samples with anonymous codes. The real name is hidden during tasting and revealed in the results!
+          {t('events.samplesHelp')}
         </p>
 
         {/* Existing samples */}
@@ -183,7 +185,7 @@ export default function CreateEventScreen() {
             style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', marginBottom: 8 }}
           >
             <div>
-              <strong>Sample {sample.code}</strong>
+              <strong>{t('common.sample')} {sample.code}</strong>
               {sample.revealName && (
                 <span style={{ marginLeft: 8, fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
                   🎭 {sample.revealName}
@@ -211,28 +213,28 @@ export default function CreateEventScreen() {
               style={{ width: 80, flexShrink: 0 }}
               value={newSampleCode}
               onChange={(e) => setNewSampleCode(e.target.value)}
-              placeholder="Code"
+              placeholder={t('events.sampleCode')}
             />
             <input
               className="form-input"
               style={{ flex: 1 }}
               value={newSampleReveal}
               onChange={(e) => setNewSampleReveal(e.target.value)}
-              placeholder="Real name (optional, for reveal)"
+              placeholder={t('events.realNamePlaceholder')}
             />
           </div>
           <button type="button" className="btn btn-outline btn-block" onClick={handleAddSample}>
-            + Add Sample
+            {t('events.addSample')}
           </button>
         </div>
 
         <div className="divider" />
 
         <div className="section-header">
-          <h2 className="section-title">Invite Participants ({invitedEmails.length})</h2>
+          <h2 className="section-title">{t('events.inviteSection')} ({invitedEmails.length})</h2>
         </div>
         <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: 12 }}>
-          Optional — you can also share the tasting link directly after creating the event.
+          {t('events.inviteHelp')}
         </p>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
@@ -242,9 +244,9 @@ export default function CreateEventScreen() {
             type="email"
             value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
-            placeholder="participant@email.com"
+            placeholder={t('events.emailPlaceholder')}
           />
-          <button type="button" className="btn btn-outline" onClick={handleAddInvite}>Invite</button>
+          <button type="button" className="btn btn-outline" onClick={handleAddInvite}>{t('common.invite')}</button>
         </div>
 
         {invitedEmails.map((email) => (
@@ -264,7 +266,7 @@ export default function CreateEventScreen() {
         ))}
 
         <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: 24 }}>
-          Create Event 🎉
+          {t('events.createEvent')}
         </button>
       </form>
     </div>

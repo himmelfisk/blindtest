@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../context/useAppContext';
 
 export default function OrganizationDetailsScreen() {
   const { id } = useParams<{ id: string }>();
   const { state, dispatch } = useAppContext();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [showAddMember, setShowAddMember] = useState(false);
   const [memberName, setMemberName] = useState('');
   const [memberEmail, setMemberEmail] = useState('');
 
   const org = state.organizations.find((o) => o.id === id);
   if (!org) {
-    return <div className="page"><p style={{ color: 'var(--color-error)', textAlign: 'center', marginTop: 40 }}>Group not found</p></div>;
+    return <div className="page"><p style={{ color: 'var(--color-error)', textAlign: 'center', marginTop: 40 }}>{t('organizations.notFound')}</p></div>;
   }
 
   const orgForms = state.forms.filter((f) => f.organizationId === id);
@@ -21,7 +23,7 @@ export default function OrganizationDetailsScreen() {
   const handleAddMember = (e: React.FormEvent) => {
     e.preventDefault();
     if (!memberName.trim() || !memberEmail.trim()) {
-      alert('Please enter both name and email.');
+      alert(t('organizations.nameEmailRequired'));
       return;
     }
     dispatch({
@@ -37,7 +39,7 @@ export default function OrganizationDetailsScreen() {
   };
 
   const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this group? All associated forms and events will also be removed.')) {
+    if (confirm(t('organizations.deleteConfirm'))) {
       dispatch({ type: 'DELETE_ORGANIZATION', payload: id! });
       navigate('/organizations');
     }
@@ -45,7 +47,7 @@ export default function OrganizationDetailsScreen() {
 
   return (
     <div className="page">
-      <button className="back-btn" onClick={() => navigate('/organizations')}>← Back</button>
+      <button className="back-btn" onClick={() => navigate('/organizations')}>{t('common.back')}</button>
 
       <h1 style={{ fontSize: '1.5rem' }}>{org.name}</h1>
       {org.description && (
@@ -57,22 +59,22 @@ export default function OrganizationDetailsScreen() {
       <div className="stats-row">
         <div className="stat-card">
           <div className="number">{orgForms.length}</div>
-          <div className="label">Forms</div>
+          <div className="label">{t('organizations.forms')}</div>
         </div>
         <div className="stat-card">
           <div className="number">{orgEvents.length}</div>
-          <div className="label">Events</div>
+          <div className="label">{t('organizations.events')}</div>
         </div>
         <div className="stat-card">
           <div className="number">{org.members.length}</div>
-          <div className="label">Members</div>
+          <div className="label">{t('organizations.membersLabel')}</div>
         </div>
       </div>
 
       <div className="section-header">
-        <h2 className="section-title">Members</h2>
+        <h2 className="section-title">{t('organizations.membersLabel')}</h2>
         <button className="text-link" onClick={() => setShowAddMember(!showAddMember)}>
-          {showAddMember ? 'Cancel' : '+ Add'}
+          {showAddMember ? t('common.cancel') : t('common.add')}
         </button>
       </div>
 
@@ -83,7 +85,7 @@ export default function OrganizationDetailsScreen() {
               className="form-input"
               value={memberName}
               onChange={(e) => setMemberName(e.target.value)}
-              placeholder="Member name"
+              placeholder={t('organizations.memberNamePlaceholder')}
             />
           </div>
           <div className="form-group">
@@ -92,10 +94,10 @@ export default function OrganizationDetailsScreen() {
               type="email"
               value={memberEmail}
               onChange={(e) => setMemberEmail(e.target.value)}
-              placeholder="Member email"
+              placeholder={t('organizations.memberEmailPlaceholder')}
             />
           </div>
-          <button type="submit" className="btn btn-primary btn-block">Add Member</button>
+          <button type="submit" className="btn btn-primary btn-block">{t('organizations.addMember')}</button>
         </form>
       )}
 
@@ -110,7 +112,7 @@ export default function OrganizationDetailsScreen() {
       ))}
 
       <button className="btn btn-danger btn-block" style={{ marginTop: 32 }} onClick={handleDelete}>
-        Delete Group
+        {t('organizations.deleteGroup')}
       </button>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import { useAppContext } from '../context/useAppContext';
 import { getCategoryEmoji } from '../utils/categoryEmoji';
@@ -9,60 +10,64 @@ const PRESET_CATEGORIES = [
   'Beer', 'Wine', 'Coffee', 'Whiskey', 'Chocolate', 'Cheese', 'Olive Oil', 'Tea', 'Other',
 ];
 
-function getPresetCriteria(category: string): CriterionDefinition[] {
-  const presets: Record<string, Array<{ name: string; description: string }>> = {
-    Beer: [
-      { name: 'Appearance', description: 'Color, clarity, foam/head' },
-      { name: 'Aroma', description: 'Smell before tasting' },
-      { name: 'Taste', description: 'Overall flavor profile' },
-      { name: 'Mouthfeel', description: 'Body, carbonation, texture' },
-      { name: 'Aftertaste', description: 'Finish and lingering flavors' },
-      { name: 'Overall Impression', description: 'General rating' },
-    ],
-    Wine: [
-      { name: 'Appearance', description: 'Color, clarity, viscosity' },
-      { name: 'Nose', description: 'Aroma intensity and complexity' },
-      { name: 'Palate', description: 'Flavor, sweetness, acidity' },
-      { name: 'Tannins', description: 'Tannin level and quality' },
-      { name: 'Finish', description: 'Length and quality of aftertaste' },
-      { name: 'Overall Impression', description: 'General rating' },
-    ],
-    Coffee: [
-      { name: 'Aroma', description: 'Smell of the brewed coffee' },
-      { name: 'Acidity', description: 'Brightness and sharpness' },
-      { name: 'Body', description: 'Weight and texture in the mouth' },
-      { name: 'Flavor', description: 'Overall taste experience' },
-      { name: 'Aftertaste', description: 'Lingering taste after swallowing' },
-      { name: 'Overall Impression', description: 'General rating' },
-    ],
-  };
+const PRESET_KEYS: Record<string, Array<{ nameKey: string; descKey: string }>> = {
+  Beer: [
+    { nameKey: 'Appearance', descKey: 'AppearanceDesc' },
+    { nameKey: 'Aroma', descKey: 'AromaDesc' },
+    { nameKey: 'Taste', descKey: 'TasteDesc' },
+    { nameKey: 'Mouthfeel', descKey: 'MouthfeelDesc' },
+    { nameKey: 'Aftertaste', descKey: 'AftertasteDesc' },
+    { nameKey: 'Overall Impression', descKey: 'Overall ImpressionDesc' },
+  ],
+  Wine: [
+    { nameKey: 'Appearance', descKey: 'AppearanceDesc' },
+    { nameKey: 'Nose', descKey: 'NoseDesc' },
+    { nameKey: 'Palate', descKey: 'PalateDesc' },
+    { nameKey: 'Tannins', descKey: 'TanninsDesc' },
+    { nameKey: 'Finish', descKey: 'FinishDesc' },
+    { nameKey: 'Overall Impression', descKey: 'Overall ImpressionDesc' },
+  ],
+  Coffee: [
+    { nameKey: 'Aroma', descKey: 'AromaDesc' },
+    { nameKey: 'Acidity', descKey: 'AcidityDesc' },
+    { nameKey: 'Body', descKey: 'BodyDesc' },
+    { nameKey: 'Flavor', descKey: 'FlavorDesc' },
+    { nameKey: 'Aftertaste', descKey: 'AftertasteDesc' },
+    { nameKey: 'Overall Impression', descKey: 'Overall ImpressionDesc' },
+  ],
+};
 
-  const items = presets[category] ?? [
-    { name: 'Appearance', description: 'Visual qualities' },
-    { name: 'Aroma', description: 'Smell/fragrance' },
-    { name: 'Taste', description: 'Flavor profile' },
-    { name: 'Overall Impression', description: 'General rating' },
-  ];
-
-  return items.map((item) => ({
-    id: uuidv4(),
-    name: item.name,
-    description: item.description,
-    minValue: 1,
-    maxValue: 10,
-  }));
-}
+const DEFAULT_PRESET_KEYS = [
+  { nameKey: 'Appearance', descKey: 'AppearanceDesc' },
+  { nameKey: 'Aroma', descKey: 'AromaDesc' },
+  { nameKey: 'Taste', descKey: 'TasteDesc' },
+  { nameKey: 'Overall Impression', descKey: 'Overall ImpressionDesc' },
+];
 
 export default function CreateFormScreen() {
   const { state, dispatch } = useAppContext();
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const getPresetCriteria = (category: string): CriterionDefinition[] => {
+    const keys = PRESET_KEYS[category] ?? DEFAULT_PRESET_KEYS;
+    const presetCategory = PRESET_KEYS[category] ? category : 'Default';
+    return keys.map((item) => ({
+      id: uuidv4(),
+      name: t(`presets.${presetCategory}.${item.nameKey}`),
+      description: t(`presets.${presetCategory}.${item.descKey}`),
+      minValue: 1,
+      maxValue: 10,
+    }));
+  };
+
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Beer');
   const [organizationId, setOrganizationId] = useState(
     state.organizations[0]?.id ?? ''
   );
-  const [criteria, setCriteria] = useState<CriterionDefinition[]>(
+  const [criteria, setCriteria] = useState<CriterionDefinition[]>(() =>
     getPresetCriteria('Beer')
   );
   const [showAdd, setShowAdd] = useState(false);
@@ -75,10 +80,10 @@ export default function CreateFormScreen() {
       <div className="page">
         <div className="empty-state">
           <div className="icon">👥</div>
-          <h3>Create a group first</h3>
-          <p>You need at least one group before creating a testing form.</p>
+          <h3>{t('forms.noGroupFirst')}</h3>
+          <p>{t('forms.noGroupFirstHint')}</p>
           <button className="btn btn-primary" style={{ marginTop: 20 }} onClick={() => navigate('/organizations/new')}>
-            Create Group
+            {t('organizations.createGroup')}
           </button>
         </div>
       </div>
@@ -92,9 +97,9 @@ export default function CreateFormScreen() {
 
   const handleAddCriterion = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newName.trim()) { alert('Please enter a criterion name.'); return; }
+    if (!newName.trim()) { alert(t('forms.alertCriterionName')); return; }
     const max = parseInt(newMax, 10);
-    if (isNaN(max) || max < 1) { alert('Please enter a valid max value.'); return; }
+    if (isNaN(max) || max < 1) { alert(t('forms.alertMaxValue')); return; }
     setCriteria([
       ...criteria,
       { id: uuidv4(), name: newName.trim(), description: newDesc.trim(), minValue: 1, maxValue: max },
@@ -107,9 +112,9 @@ export default function CreateFormScreen() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) { alert('Please enter a form name.'); return; }
-    if (!organizationId) { alert('Please select a group.'); return; }
-    if (criteria.length === 0) { alert('Please add at least one criterion.'); return; }
+    if (!name.trim()) { alert(t('forms.alertFormName')); return; }
+    if (!organizationId) { alert(t('forms.alertSelectGroup')); return; }
+    if (criteria.length === 0) { alert(t('forms.alertAddCriterion')); return; }
     dispatch({
       type: 'ADD_FORM',
       payload: { name: name.trim(), description: description.trim(), category, criteria, organizationId },
@@ -119,26 +124,26 @@ export default function CreateFormScreen() {
 
   return (
     <div className="page">
-      <button type="button" className="back-btn" onClick={() => navigate('/forms')}>← Back</button>
+      <button type="button" className="back-btn" onClick={() => navigate('/forms')}>{t('common.back')}</button>
 
-      <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>Create Testing Form</h1>
+      <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>{t('forms.createTitle')}</h1>
       <p style={{ color: 'var(--color-text-secondary)', marginBottom: 24, fontSize: '0.875rem' }}>
-        Define how your friends will rate each sample.
+        {t('forms.createDesc')}
       </p>
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label className="form-label">Form Name *</label>
-          <input className="form-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., IPA Blind Tasting, Coffee Cupping" />
+          <label className="form-label">{t('forms.formName')}</label>
+          <input className="form-input" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('forms.formNamePlaceholder')} />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Description</label>
-          <textarea className="form-input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What are you testing?" />
+          <label className="form-label">{t('common.description')}</label>
+          <textarea className="form-input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t('forms.descriptionPlaceholder')} />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Group *</label>
+          <label className="form-label">{t('forms.group')}</label>
           <div className="picker-row">
             {state.organizations.map((org) => (
               <button
@@ -154,7 +159,7 @@ export default function CreateFormScreen() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Category</label>
+          <label className="form-label">{t('forms.category')}</label>
           <div className="chip-row">
             {PRESET_CATEGORIES.map((cat) => (
               <button
@@ -163,7 +168,7 @@ export default function CreateFormScreen() {
                 className={`chip${category === cat ? ' selected' : ''}`}
                 onClick={() => handleCategoryChange(cat)}
               >
-                {getCategoryEmoji(cat)} {cat}
+                {getCategoryEmoji(cat)} {t(`categories.${cat}`)}
               </button>
             ))}
           </div>
@@ -172,26 +177,26 @@ export default function CreateFormScreen() {
         <div className="divider" />
 
         <div className="section-header">
-          <h2 className="section-title">Scoring Criteria ({criteria.length})</h2>
+          <h2 className="section-title">{t('forms.scoringCriteria')} ({criteria.length})</h2>
           <button type="button" className="text-link" onClick={() => setShowAdd(!showAdd)}>
-            {showAdd ? 'Cancel' : '+ Add'}
+            {showAdd ? t('common.cancel') : t('common.add')}
           </button>
         </div>
 
         {showAdd && (
           <div className="card" style={{ marginBottom: 16 }}>
             <div className="form-group">
-              <input className="form-input" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Criterion name" />
+              <input className="form-input" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t('forms.criterionNamePlaceholder')} />
             </div>
             <div className="form-group">
-              <input className="form-input" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="Description (optional)" />
+              <input className="form-input" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder={t('forms.criterionDescPlaceholder')} />
             </div>
             <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <label className="form-label" style={{ marginBottom: 0 }}>Max score:</label>
+              <label className="form-label" style={{ marginBottom: 0 }}>{t('forms.maxScore')}</label>
               <input className="form-input" style={{ maxWidth: 80 }} value={newMax} onChange={(e) => setNewMax(e.target.value)} type="number" min="1" />
             </div>
             <button type="button" className="btn btn-primary btn-block" onClick={handleAddCriterion}>
-              Add Criterion
+              {t('forms.addCriterion')}
             </button>
           </div>
         )}
@@ -204,7 +209,7 @@ export default function CreateFormScreen() {
                 <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginTop: 2 }}>{c.description}</div>
               )}
               <div style={{ fontSize: '0.75rem', color: 'var(--color-text-light)', marginTop: 4 }}>
-                Score: {c.minValue} – {c.maxValue}
+                {t('common.score')}: {c.minValue} – {c.maxValue}
               </div>
             </div>
             <button
@@ -221,7 +226,7 @@ export default function CreateFormScreen() {
         ))}
 
         <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: 24 }}>
-          Create Form
+          {t('forms.createForm')}
         </button>
       </form>
     </div>
