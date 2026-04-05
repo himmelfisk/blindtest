@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../context/useAppContext';
 import { getCategoryEmoji } from '../utils/categoryEmoji';
 
@@ -7,12 +8,13 @@ export default function EventDetailsScreen() {
   const { id } = useParams<{ id: string }>();
   const { state, dispatch } = useAppContext();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [inviteEmail, setInviteEmail] = useState('');
   const [linkCopied, setLinkCopied] = useState(false);
 
   const event = state.events.find((e) => e.id === id);
   if (!event) {
-    return <div className="page"><p style={{ color: 'var(--color-error)', textAlign: 'center', marginTop: 40 }}>Event not found</p></div>;
+    return <div className="page"><p style={{ color: 'var(--color-error)', textAlign: 'center', marginTop: 40 }}>{t('events.notFound')}</p></div>;
   }
 
   const org = state.organizations.find((o) => o.id === event.organizationId);
@@ -27,7 +29,7 @@ export default function EventDetailsScreen() {
   const handleAddInvite = () => {
     const email = inviteEmail.trim().toLowerCase();
     if (!email) return;
-    if (event.invitedEmails.includes(email)) { alert('Already invited.'); return; }
+    if (event.invitedEmails.includes(email)) { alert(t('events.alreadyInvited')); return; }
     dispatch({ type: 'ADD_INVITED_EMAIL', payload: { eventId: id!, email } });
     setInviteEmail('');
   };
@@ -39,21 +41,26 @@ export default function EventDetailsScreen() {
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2000);
     } catch {
-      // Fallback: show the link in a prompt
-      prompt('Copy this link and share it with your friends:', url);
+      prompt(t('events.copyPrompt'), url);
     }
   };
 
   const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this event?')) {
+    if (confirm(t('events.deleteConfirm'))) {
       dispatch({ type: 'DELETE_EVENT', payload: id! });
       navigate('/events');
     }
   };
 
+  const statusLabels: Record<string, string> = {
+    upcoming: t('events.upcoming'),
+    active: t('events.active'),
+    completed: t('events.completed'),
+  };
+
   return (
     <div className="page">
-      <button className="back-btn" onClick={() => navigate('/events')}>← Events</button>
+      <button className="back-btn" onClick={() => navigate('/events')}>{t('events.backEvents')}</button>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ fontSize: '1.5rem', flex: 1 }}>{emoji} {event.name}</h1>
@@ -67,59 +74,56 @@ export default function EventDetailsScreen() {
       )}
 
       <p style={{ fontSize: '0.75rem', color: 'var(--color-text-light)', marginTop: 8 }}>
-        {org?.name ?? 'Unknown group'} • {form?.name ?? 'Unknown form'} • {new Date(event.date).toLocaleDateString()}
+        {org?.name ?? t('common.unknownGroup')} • {form?.name ?? t('common.unknownForm')} • {new Date(event.date).toLocaleDateString()}
       </p>
 
       <div className="stats-row">
         <div className="stat-card">
           <div className="number">{event.samples.length}</div>
-          <div className="label">Samples</div>
+          <div className="label">{t('events.samplesLabel')}</div>
         </div>
         <div className="stat-card">
           <div className="number">{event.invitedEmails.length}</div>
-          <div className="label">Invited</div>
+          <div className="label">{t('events.invited')}</div>
         </div>
         <div className="stat-card">
           <div className="number">{submissions.length}</div>
-          <div className="label">Responses</div>
+          <div className="label">{t('events.responsesLabel')}</div>
         </div>
       </div>
 
-      {/* Quick actions for active event */}
       {event.status === 'active' && (
         <div className="actions-row" style={{ marginBottom: 16 }}>
           <button className="action-card" onClick={() => navigate(`/events/${id}/test`)}>
             <div className="icon">🧪</div>
-            <div className="label">Start Tasting</div>
+            <div className="label">{t('events.startTasting')}</div>
           </button>
           <button className="action-card" onClick={handleCopyLink}>
             <div className="icon">{linkCopied ? '✅' : '🔗'}</div>
-            <div className="label">{linkCopied ? 'Copied!' : 'Copy Link'}</div>
+            <div className="label">{linkCopied ? t('events.copied') : t('events.copyLink')}</div>
           </button>
           <button
             className="action-card"
             onClick={() => navigate(`/events/${id}/results`)}
           >
             <div className="icon">📊</div>
-            <div className="label">Results</div>
+            <div className="label">{t('events.results')}</div>
           </button>
         </div>
       )}
 
-      {/* Results button for completed events */}
       {event.status === 'completed' && submissions.length > 0 && (
         <button
           className="btn btn-secondary btn-block"
           style={{ marginBottom: 16 }}
           onClick={() => navigate(`/events/${id}/results`)}
         >
-          🏆 View Results ({submissions.length} response{submissions.length !== 1 ? 's' : ''})
+          {t('events.viewResults')} ({submissions.length} {submissions.length !== 1 ? t('events.responses') : t('events.response')})
         </button>
       )}
 
-      {/* Status controls */}
       <div className="section-header" style={{ marginTop: 8 }}>
-        <h2 className="section-title">Status</h2>
+        <h2 className="section-title">{t('events.status')}</h2>
       </div>
       <div className="picker-row" style={{ marginBottom: 16 }}>
         {(['upcoming', 'active', 'completed'] as const).map((s) => (
@@ -129,21 +133,20 @@ export default function EventDetailsScreen() {
             onClick={() => handleStatusChange(s)}
           >
             {s === 'upcoming' ? '📅 ' : s === 'active' ? '🟢 ' : '✅ '}
-            {s.charAt(0).toUpperCase() + s.slice(1)}
+            {statusLabels[s]}
           </button>
         ))}
       </div>
 
-      {/* Samples */}
       <div className="divider" />
-      <h2 className="section-title" style={{ marginBottom: 12 }}>Samples</h2>
+      <h2 className="section-title" style={{ marginBottom: 12 }}>{t('events.samplesLabel')}</h2>
       {event.samples.length === 0 ? (
-        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-light)' }}>No samples added.</p>
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-light)' }}>{t('events.noSamples')}</p>
       ) : (
         event.samples.map((s) => (
           <div key={s.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px' }}>
             <div>
-              <strong>Sample {s.code}</strong>
+              <strong>{t('common.sample')} {s.code}</strong>
               {s.revealName && (
                 <span style={{ marginLeft: 8, fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
                   ({s.revealName})
@@ -154,9 +157,8 @@ export default function EventDetailsScreen() {
         ))
       )}
 
-      {/* Invitations */}
       <div className="divider" />
-      <h2 className="section-title" style={{ marginBottom: 12 }}>Invited Participants</h2>
+      <h2 className="section-title" style={{ marginBottom: 12 }}>{t('events.invitedParticipants')}</h2>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
         <input
@@ -165,13 +167,13 @@ export default function EventDetailsScreen() {
           type="email"
           value={inviteEmail}
           onChange={(e) => setInviteEmail(e.target.value)}
-          placeholder="participant@email.com"
+          placeholder={t('events.emailPlaceholder')}
         />
-        <button className="btn btn-outline" onClick={handleAddInvite}>Invite</button>
+        <button className="btn btn-outline" onClick={handleAddInvite}>{t('common.invite')}</button>
       </div>
 
       {event.invitedEmails.length === 0 ? (
-        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-light)' }}>No one invited yet.</p>
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-light)' }}>{t('events.noInvited')}</p>
       ) : (
         event.invitedEmails.map((email) => (
           <div key={email} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px' }}>
@@ -189,30 +191,28 @@ export default function EventDetailsScreen() {
         ))
       )}
 
-      {/* Share link (non-active events too) */}
       {event.status !== 'active' && (
         <button
           className="btn btn-outline btn-block"
           style={{ marginTop: 16 }}
           onClick={handleCopyLink}
         >
-          {linkCopied ? '✅ Link Copied!' : '🔗 Copy Tasting Link'}
+          {linkCopied ? t('events.linkCopied') : t('events.copyTastingLink')}
         </button>
       )}
 
-      {/* View results anytime there are submissions */}
       {event.status !== 'completed' && submissions.length > 0 && (
         <button
           className="btn btn-outline btn-block"
           style={{ marginTop: 12 }}
           onClick={() => navigate(`/events/${id}/results`)}
         >
-          📊 View Results ({submissions.length})
+          {t('events.viewResultsCount')} ({submissions.length})
         </button>
       )}
 
       <button className="btn btn-danger btn-block" style={{ marginTop: 24 }} onClick={handleDelete}>
-        Delete Event
+        {t('events.deleteEvent')}
       </button>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../context/useAppContext';
 import { getCategoryEmoji } from '../utils/categoryEmoji';
 
@@ -7,6 +8,7 @@ export default function ResultsScreen() {
   const { id } = useParams<{ id: string }>();
   const { state } = useAppContext();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [revealedSamples, setRevealedSamples] = useState<Set<string>>(new Set());
   const [showAllReveals, setShowAllReveals] = useState(false);
 
@@ -18,7 +20,7 @@ export default function ResultsScreen() {
     return (
       <div className="page">
         <p style={{ color: 'var(--color-error)', textAlign: 'center', marginTop: 40 }}>
-          Event or form not found
+          {t('results.notFound')}
         </p>
       </div>
     );
@@ -27,11 +29,11 @@ export default function ResultsScreen() {
   if (submissions.length === 0) {
     return (
       <div className="page">
-        <button className="back-btn" onClick={() => navigate(`/events/${id}`)}>← Back</button>
+        <button className="back-btn" onClick={() => navigate(`/events/${id}`)}>{t('common.back')}</button>
         <div className="empty-state">
           <div className="icon">📊</div>
-          <h3>No results yet</h3>
-          <p>Waiting for participants to submit their evaluations.</p>
+          <h3>{t('results.noResults')}</h3>
+          <p>{t('results.noResultsHint')}</p>
         </div>
       </div>
     );
@@ -39,7 +41,6 @@ export default function ResultsScreen() {
 
   const maxScore = form.criteria.reduce((sum, c) => sum + c.maxValue, 0);
 
-  // Compute average scores per sample
   const sampleResults = event.samples.map((sample) => {
     const sampleEvals = submissions
       .map((sub) => sub.evaluations.find((ev) => ev.sampleId === sample.id))
@@ -63,7 +64,6 @@ export default function ResultsScreen() {
     return { sample, avgTotal, sampleEvals, criterionAverages, evalCount: sampleEvals.length };
   });
 
-  // Sort by average total score (highest first)
   const ranked = [...sampleResults].sort((a, b) => b.avgTotal - a.avgTotal);
 
   const getMedal = (index: number): string => {
@@ -96,13 +96,13 @@ export default function ResultsScreen() {
 
   return (
     <div className="page">
-      <button className="back-btn" onClick={() => navigate(`/events/${id}`)}>← Back</button>
+      <button className="back-btn" onClick={() => navigate(`/events/${id}`)}>{t('common.back')}</button>
 
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
         <div style={{ fontSize: '2.5rem', marginBottom: 8 }}>🏆</div>
-        <h1 style={{ fontSize: '1.5rem', marginBottom: 4 }}>Results</h1>
+        <h1 style={{ fontSize: '1.5rem', marginBottom: 4 }}>{t('results.title')}</h1>
         <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
-          {getCategoryEmoji(form.category)} {event.name} • {submissions.length} taster{submissions.length !== 1 ? 's' : ''}
+          {getCategoryEmoji(form.category)} {event.name} • {submissions.length} {submissions.length !== 1 ? t('results.tasters') : t('results.taster')}
         </p>
       </div>
 
@@ -112,11 +112,10 @@ export default function ResultsScreen() {
           style={{ marginBottom: 20 }}
           onClick={handleRevealAll}
         >
-          {showAllReveals ? '🙈 Hide All Names' : '🎭 Reveal All Names'}
+          {showAllReveals ? t('results.hideAllNames') : t('results.revealAllNames')}
         </button>
       )}
 
-      {/* Rankings */}
       {ranked.map((result, index) => {
         const pct = maxScore > 0 ? (result.avgTotal / maxScore) * 100 : 0;
         const isRevealed = revealedSamples.has(result.sample.id);
@@ -135,19 +134,19 @@ export default function ResultsScreen() {
               </span>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <strong style={{ fontSize: '1.0625rem' }}>Sample {result.sample.code}</strong>
+                  <strong style={{ fontSize: '1.0625rem' }}>{t('common.sample')} {result.sample.code}</strong>
                   {result.sample.revealName && (
                     <button
                       onClick={() => toggleReveal(result.sample.id)}
                       className="badge badge-category"
                       style={{ cursor: 'pointer', border: 'none' }}
                     >
-                      {isRevealed ? result.sample.revealName : '🎭 Tap to reveal'}
+                      {isRevealed ? result.sample.revealName : t('results.tapToReveal')}
                     </button>
                   )}
                 </div>
                 <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginTop: 2 }}>
-                  {result.evalCount} evaluation{result.evalCount !== 1 ? 's' : ''}
+                  {result.evalCount} {result.evalCount !== 1 ? t('results.evaluations') : t('results.evaluation')}
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
@@ -160,7 +159,6 @@ export default function ResultsScreen() {
               </div>
             </div>
 
-            {/* Score bar */}
             <div style={{ background: 'var(--color-border)', borderRadius: 4, height: 8, marginBottom: 8 }}>
               <div
                 style={{
@@ -173,7 +171,6 @@ export default function ResultsScreen() {
               />
             </div>
 
-            {/* Criterion breakdown */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {result.criterionAverages.map(({ criterion, avg }) => (
                 <span
@@ -194,9 +191,8 @@ export default function ResultsScreen() {
         );
       })}
 
-      {/* Individual Submissions */}
       <div className="divider" />
-      <h2 className="section-title" style={{ marginBottom: 16 }}>Individual Scores</h2>
+      <h2 className="section-title" style={{ marginBottom: 16 }}>{t('results.individualScores')}</h2>
 
       {submissions.map((sub) => {
         const totalScore = sub.evaluations.reduce(
@@ -209,7 +205,7 @@ export default function ResultsScreen() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <strong>{sub.participantName}</strong>
               <span style={{ fontSize: '0.75rem', color: 'var(--color-text-light)' }}>
-                Total: {totalScore}/{totalMax}
+                {t('results.total')}: {totalScore}/{totalMax}
               </span>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>

@@ -1,6 +1,7 @@
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import TabBar from './components/TabBar';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import HomeScreen from './screens/HomeScreen';
 import OrganizationsListScreen from './screens/OrganizationsListScreen';
 import CreateOrganizationScreen from './screens/CreateOrganizationScreen';
@@ -20,6 +21,7 @@ function AppRoutes() {
 
   return (
     <>
+      <LanguageSwitcher />
       <Routes>
         <Route path="/" element={<HomeScreen />} />
         <Route path="/organizations" element={<OrganizationsListScreen />} />

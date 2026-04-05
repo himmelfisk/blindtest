@@ -1,24 +1,26 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../context/useAppContext';
 import { getCategoryEmoji } from '../utils/categoryEmoji';
 
 export default function EventsListScreen() {
   const { state } = useAppContext();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div>
       <div className="page-header">
-        <h1>Events</h1>
-        <p>Your blind tasting events</p>
+        <h1>{t('events.title')}</h1>
+        <p>{t('events.subtitle')}</p>
       </div>
 
       <div className="page">
         {state.events.length === 0 ? (
           <div className="empty-state">
             <div className="icon">🎉</div>
-            <h3>No events yet</h3>
-            <p>Create a testing form first, then organize a blind tasting with friends!</p>
+            <h3>{t('events.empty')}</h3>
+            <p>{t('events.emptyHint')}</p>
           </div>
         ) : (
           state.events.map((event) => {
@@ -43,11 +45,11 @@ export default function EventsListScreen() {
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, fontSize: '0.75rem', color: 'var(--color-text-light)' }}>
-                  <span>{org?.name ?? 'No group'} • {form?.name ?? 'No form'}</span>
+                  <span>{org?.name ?? t('common.noGroup')} • {form?.name ?? t('common.noForm')}</span>
                   <span>{new Date(event.date).toLocaleDateString()}</span>
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--color-text-light)', marginTop: 4 }}>
-                  {event.samples.length} samples • {submissions.length} response{submissions.length !== 1 ? 's' : ''}
+                  {event.samples.length} {t('events.samples')} • {submissions.length} {submissions.length !== 1 ? t('events.responses') : t('events.response')}
                 </div>
               </div>
             );
@@ -59,7 +61,7 @@ export default function EventsListScreen() {
         className="fab"
         onClick={() => {
           if (state.forms.length === 0) {
-            alert('Please create a testing form first before creating an event.');
+            alert(t('events.createFormFirst'));
             navigate('/forms/new');
           } else {
             navigate('/events/new');

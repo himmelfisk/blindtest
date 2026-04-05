@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../context/useAppContext';
 
 export default function CreateOrganizationScreen() {
   const { dispatch } = useAppContext();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [adminName, setAdminName] = useState('');
@@ -13,7 +15,7 @@ export default function CreateOrganizationScreen() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !adminName.trim() || !adminEmail.trim()) {
-      alert('Please fill in all required fields.');
+      alert(t('organizations.requiredFields'));
       return;
     }
     dispatch({
@@ -30,61 +32,61 @@ export default function CreateOrganizationScreen() {
 
   return (
     <div className="page">
-      <button className="back-btn" onClick={() => navigate('/organizations')}>← Back</button>
+      <button className="back-btn" onClick={() => navigate('/organizations')}>{t('common.back')}</button>
 
-      <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>Create a New Group</h1>
+      <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>{t('organizations.createTitle')}</h1>
       <p style={{ color: 'var(--color-text-secondary)', marginBottom: 24, fontSize: '0.875rem' }}>
-        A group is your tasting crew. Add your friends and start organizing events together!
+        {t('organizations.createDesc')}
       </p>
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label className="form-label">Group Name *</label>
+          <label className="form-label">{t('organizations.groupName')}</label>
           <input
             className="form-input"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g., Beer Tasting Club, Wine Society"
+            placeholder={t('organizations.groupNamePlaceholder')}
           />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Description</label>
+          <label className="form-label">{t('common.description')}</label>
           <textarea
             className="form-input"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="What is this group about?"
+            placeholder={t('organizations.descriptionPlaceholder')}
           />
         </div>
 
         <div className="divider" />
 
-        <h2 style={{ fontSize: '1rem', marginBottom: 16 }}>Your Info (Admin)</h2>
+        <h2 style={{ fontSize: '1rem', marginBottom: 16 }}>{t('organizations.adminInfo')}</h2>
 
         <div className="form-group">
-          <label className="form-label">Your Name *</label>
+          <label className="form-label">{t('organizations.yourName')}</label>
           <input
             className="form-input"
             value={adminName}
             onChange={(e) => setAdminName(e.target.value)}
-            placeholder="Enter your name"
+            placeholder={t('organizations.yourNamePlaceholder')}
           />
         </div>
 
         <div className="form-group">
-          <label className="form-label">Your Email *</label>
+          <label className="form-label">{t('organizations.yourEmail')}</label>
           <input
             className="form-input"
             type="email"
             value={adminEmail}
             onChange={(e) => setAdminEmail(e.target.value)}
-            placeholder="your@email.com"
+            placeholder={t('organizations.yourEmailPlaceholder')}
           />
         </div>
 
         <button type="submit" className="btn btn-primary btn-block">
-          Create Group
+          {t('organizations.createGroup')}
         </button>
       </form>
     </div>

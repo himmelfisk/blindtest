@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../context/useAppContext';
 import { getCategoryEmoji } from '../utils/categoryEmoji';
 import type { SampleEvaluation, CriterionScore } from '../models/types';
@@ -8,6 +9,7 @@ export default function BlindTestScreen() {
   const { id } = useParams<{ id: string }>();
   const { state, dispatch } = useAppContext();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const event = state.events.find((e) => e.id === id);
   const form = event ? state.forms.find((f) => f.id === event.formId) : undefined;
@@ -22,7 +24,7 @@ export default function BlindTestScreen() {
   const [finalEvaluations, setFinalEvaluations] = useState<SampleEvaluation[]>([]);
 
   if (!event || !form) {
-    return <div className="page"><p style={{ color: 'var(--color-error)', textAlign: 'center', marginTop: 40 }}>Event or form not found</p></div>;
+    return <div className="page"><p style={{ color: 'var(--color-error)', textAlign: 'center', marginTop: 40 }}>{t('blindTest.notFound')}</p></div>;
   }
 
   const samples = event.samples;
@@ -32,7 +34,7 @@ export default function BlindTestScreen() {
     form.criteria.map((c) => ({ criterionId: c.id, value: Math.ceil((c.minValue + c.maxValue) / 2), note: '' }));
 
   const handleStart = () => {
-    if (!participantName.trim()) { alert('Please enter your name.'); return; }
+    if (!participantName.trim()) { alert(t('blindTest.alertName')); return; }
     setCurrentScores(initScores());
     setStarted(true);
   };
@@ -89,13 +91,12 @@ export default function BlindTestScreen() {
       <div className="page" style={{ paddingBottom: 40 }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <div style={{ fontSize: '3rem', marginBottom: 8 }}>🎉</div>
-          <h1 style={{ fontSize: '1.5rem', marginBottom: 4 }}>Nice one, {participantName}!</h1>
+          <h1 style={{ fontSize: '1.5rem', marginBottom: 4 }}>{t('blindTest.niceOne', { name: participantName })}</h1>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
-            Your tasting is complete. Here's your recap:
+            {t('blindTest.tastingComplete')}
           </p>
         </div>
 
-        {/* Grand total */}
         <div
           style={{
             background: 'var(--color-primary)', borderRadius: 'var(--radius-md)',
@@ -103,20 +104,19 @@ export default function BlindTestScreen() {
             marginBottom: 20,
           }}
         >
-          <span style={{ color: '#fff', fontSize: '0.9375rem', fontWeight: 600 }}>Your Total</span>
+          <span style={{ color: '#fff', fontSize: '0.9375rem', fontWeight: 600 }}>{t('blindTest.yourTotal')}</span>
           <span style={{ color: '#fff', fontWeight: 700, fontSize: '1.5rem' }}>
             {grandTotal} / {grandMax}
           </span>
         </div>
 
-        {/* Per-sample scores */}
         {finalEvaluations.map((ev, idx) => {
           const sample = samples[idx];
           const sampleTotal = ev.scores.reduce((s, sc) => s + sc.value, 0);
           return (
             <div key={sample.id} className="card" style={{ marginBottom: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                <strong>Sample {sample.code}</strong>
+                <strong>{t('common.sample')} {sample.code}</strong>
                 <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>
                   {sampleTotal} / {maxScore}
                 </span>
@@ -148,14 +148,14 @@ export default function BlindTestScreen() {
             style={{ flex: 1 }}
             onClick={() => navigate(`/events/${id}`)}
           >
-            Back to Event
+            {t('blindTest.backToEvent')}
           </button>
           <button
             className="btn btn-secondary"
             style={{ flex: 1 }}
             onClick={() => navigate(`/events/${id}/results`)}
           >
-            📊 View Results
+            {t('blindTest.viewResults')}
           </button>
         </div>
       </div>
@@ -169,7 +169,7 @@ export default function BlindTestScreen() {
       <div className="page">
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <div style={{ fontSize: '3rem', marginBottom: 8 }}>{emoji}</div>
-          <h1 style={{ fontSize: '1.5rem', marginBottom: 4 }}>Blind Tasting</h1>
+          <h1 style={{ fontSize: '1.5rem', marginBottom: 4 }}>{t('blindTest.blindTasting')}</h1>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9375rem', fontWeight: 600 }}>
             {event.name}
           </p>
@@ -179,31 +179,31 @@ export default function BlindTestScreen() {
           <div style={{ display: 'flex', justifyContent: 'center', gap: 24 }}>
             <div>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>{samples.length}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Samples</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{t('blindTest.samplesLabel')}</div>
             </div>
             <div>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>{form.criteria.length}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Criteria</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{t('blindTest.criteriaLabel')}</div>
             </div>
             <div>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--color-primary)' }}>{maxScore}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Max Score</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{t('blindTest.maxScoreLabel')}</div>
             </div>
           </div>
         </div>
 
         <div className="form-group">
-          <label className="form-label">What's your name?</label>
+          <label className="form-label">{t('blindTest.whatsYourName')}</label>
           <input
             className="form-input"
             value={participantName}
             onChange={(e) => setParticipantName(e.target.value)}
-            placeholder="Enter your name"
+            placeholder={t('blindTest.enterName')}
           />
         </div>
 
         <button className="btn btn-primary btn-block" onClick={handleStart}>
-          Let's go! 🍻
+          {t('blindTest.letsGo')}
         </button>
       </div>
     );
@@ -215,13 +215,12 @@ export default function BlindTestScreen() {
   return (
     <div className="page" style={{ paddingBottom: 40 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h1 style={{ fontSize: '1.25rem' }}>Sample {currentSample.code}</h1>
+        <h1 style={{ fontSize: '1.25rem' }}>{t('common.sample')} {currentSample.code}</h1>
         <span className="badge badge-category">
           {currentSampleIndex + 1} / {samples.length}
         </span>
       </div>
 
-      {/* Progress bar — fills proportionally including current sample */}
       <div style={{ background: 'var(--color-border)', borderRadius: 4, height: 6, marginBottom: 24 }}>
         <div
           style={{
@@ -260,19 +259,19 @@ export default function BlindTestScreen() {
               style={{ marginTop: 8, fontSize: '0.8125rem' }}
               value={score?.note ?? ''}
               onChange={(e) => handleNoteChange(criterion.id, e.target.value)}
-              placeholder="Notes (optional)"
+              placeholder={t('blindTest.notesPlaceholder')}
             />
           </div>
         );
       })}
 
       <div className="form-group" style={{ marginTop: 8 }}>
-        <label className="form-label">Overall Comment</label>
+        <label className="form-label">{t('blindTest.overallComment')}</label>
         <textarea
           className="form-input"
           value={currentComment}
           onChange={(e) => setCurrentComment(e.target.value)}
-          placeholder="Any additional thoughts on this sample..."
+          placeholder={t('blindTest.overallCommentPlaceholder')}
         />
       </div>
 
@@ -283,14 +282,14 @@ export default function BlindTestScreen() {
           marginBottom: 16,
         }}
       >
-        <span style={{ color: '#fff', fontSize: '0.875rem' }}>Total Score</span>
+        <span style={{ color: '#fff', fontSize: '0.875rem' }}>{t('blindTest.totalScore')}</span>
         <span style={{ color: '#fff', fontWeight: 700, fontSize: '1.25rem' }}>
           {totalScore} / {maxScore}
         </span>
       </div>
 
       <button className="btn btn-primary btn-block" onClick={handleNextSample}>
-        {currentSampleIndex < samples.length - 1 ? 'Next Sample →' : '✅ Submit Evaluation'}
+        {currentSampleIndex < samples.length - 1 ? t('blindTest.nextSample') : t('blindTest.submitEvaluation')}
       </button>
     </div>
   );
