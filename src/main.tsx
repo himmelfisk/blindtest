@@ -6,7 +6,7 @@ import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Suspense fallback={<div />}>
+    <Suspense fallback={<div role="status" aria-label="Loading" />}>
       <App />
     </Suspense>
   </StrictMode>,
