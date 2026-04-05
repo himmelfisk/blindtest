@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Wine glass bowl -->
+  <path d="M14 6 C14 6 12 20 24 22 C36 20 34 6 34 6 Z" fill="#863bff" opacity="0.85"/>
+  <!-- Stem -->
+  <rect x="22" y="22" width="4" height="12" rx="1" fill="#863bff"/>
+  <!-- Base -->
+  <ellipse cx="24" cy="36" rx="9" ry="3" fill="#863bff"/>
+  <!-- Question mark (blind element) -->
+  <text x="24" y="18" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="14" fill="white">?</text>
+</svg>
